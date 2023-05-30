@@ -23,7 +23,6 @@ class Worker:
         self.world_size = tp_world_size * pp_world_size
         self.tp_world_size = tp_world_size
         self.pp_world_size = pp_world_size
-        disable_existing_loggers(exclude=['energonai', 'colossalai'])
         colossalai.launch({'parallel': {'tensor': {'mode': '1d', 'size': tp_world_size},
                           'pipeline': pp_world_size}}, rank, self.world_size, master_host, master_port)
         self.tp_rank = gpc.get_local_rank(ParallelMode.PARALLEL_1D)
@@ -104,7 +103,9 @@ def launch_workers(tp_world_size: int, pp_world_size: int, master_host: str, mas
     procs = []
     for i in range(n_proc_per_node):
         rank = n_proc_per_node * node_rank + i
-        p = ctx.Process(target=Worker, args=(rank, tp_world_size, pp_world_size,
-                                             master_host, master_port, rpc_port, n_proc_per_node, model_fn, pipe_size, rpc_disable_shm), kwargs=model_kwargs)
+        p = ctx.Process(target=Worker,
+                        args=(rank, tp_world_size, pp_world_size, master_host, master_port, rpc_port, n_proc_per_node, model_fn, pipe_size, rpc_disable_shm),
+                        kwargs=model_kwargs,
+                        name=f"local_rank_{i}")
         procs.append(p)
         p.start()

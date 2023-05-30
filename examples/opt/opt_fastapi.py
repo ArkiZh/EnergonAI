@@ -87,7 +87,7 @@ FIXED_CACHE_KEYS = [
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('model', choices=['opt-125m', 'opt-6.7b', 'opt-30b', 'opt-175b'])
+    parser.add_argument('--model', choices=['opt-125m', 'opt-6.7b', 'opt-30b', 'opt-175b'], default="opt-125m")
     parser.add_argument('--tp', type=int, default=1)
     parser.add_argument('--master_host', default='localhost')
     parser.add_argument('--master_port', type=int, default=19990)
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('--http_host', default='0.0.0.0')
     parser.add_argument('--http_port', type=int, default=7070)
     parser.add_argument('--checkpoint', default=None)
-    parser.add_argument('--cache_size', type=int, default=0)
+    parser.add_argument('--cache_size', type=int, default=5)
     parser.add_argument('--cache_list_size', type=int, default=1)
     args = parser.parse_args()
     print_args(args)
@@ -107,6 +107,8 @@ if __name__ == '__main__':
         model_kwargs['checkpoint'] = args.checkpoint
 
     logger = logging.getLogger(__name__)
+    # import os
+    # os.environ["TRANSFORMERS_OFFLINE"] = "0"
     tokenizer = GPT2Tokenizer.from_pretrained('facebook/opt-30b')
     if args.cache_size > 0:
         cache = ListCache(args.cache_size, args.cache_list_size, fixed_keys=FIXED_CACHE_KEYS)

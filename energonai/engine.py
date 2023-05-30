@@ -24,7 +24,6 @@ class AsyncEngine:
     def __init__(self, tp_world_size: int, pp_world_size: int, master_host: str, rpc_port: int, n_proc_per_node: int,
                  batch_manager: Optional[BatchManager] = None, pipe_size: int = 1, queue_size: int = 0, rpc_disable_shm: bool = True) -> None:
         self.lock = Lock()
-        self.logger = get_dist_logger('energonai')
         if batch_manager is None:
             self.batch_manager = BatchManager()
         else:
@@ -66,7 +65,7 @@ class AsyncEngine:
         self.timer_info: Dict[Hashable, Tuple[int, float]] = {}
         self.completion_map: Dict[Hashable, Any] = {}
 
-        self.logger.info('Engine start')
+        print('Engine start')
         self._start()
         self.register_sigint()
 
@@ -98,7 +97,7 @@ class AsyncEngine:
                 for uid, output in self.batch_manager.split_batch(task_entries[0], **batch_info):
                     self.completion_map[uid] = output
                 batch_size, start_time = self.timer_info.pop(task_entries[0].uids)
-                self.logger.info(f'batch size: {batch_size}, time: {time.time() -start_time:.3f}')
+                print(f'batch size: {batch_size}, time: {time.time() -start_time:.3f}')
             else:
                 time.sleep(0.01)
 
